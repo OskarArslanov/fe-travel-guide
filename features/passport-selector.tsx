@@ -1,0 +1,242 @@
+"use client";
+
+import { FC } from "react";
+import { IdValue } from "../consts/props";
+import { Selector } from "@/components/selector";
+
+// Список стран с паспортами (ISO-2 → название)
+const PASSPORT_LIST: IdValue[] = [
+  { id: "AD", value: "Andorra" },
+  { id: "AE", value: "United Arab Emirates" },
+  { id: "AF", value: "Afghanistan" },
+  { id: "AG", value: "Antigua and Barbuda" },
+  { id: "AL", value: "Albania" },
+  { id: "AM", value: "Armenia" },
+  { id: "AO", value: "Angola" },
+  { id: "AR", value: "Argentina" },
+  { id: "AT", value: "Austria" },
+  { id: "AU", value: "Australia" },
+  { id: "AZ", value: "Azerbaijan" },
+  { id: "BA", value: "Bosnia and Herzegovina" },
+  { id: "BB", value: "Barbados" },
+  { id: "BD", value: "Bangladesh" },
+  { id: "BE", value: "Belgium" },
+  { id: "BF", value: "Burkina Faso" },
+  { id: "BG", value: "Bulgaria" },
+  { id: "BH", value: "Bahrain" },
+  { id: "BI", value: "Burundi" },
+  { id: "BJ", value: "Benin" },
+  { id: "BN", value: "Brunei" },
+  { id: "BO", value: "Bolivia" },
+  { id: "BR", value: "Brazil" },
+  { id: "BS", value: "Bahamas" },
+  { id: "BT", value: "Bhutan" },
+  { id: "BW", value: "Botswana" },
+  { id: "BY", value: "Belarus" },
+  { id: "BZ", value: "Belize" },
+  { id: "CA", value: "Canada" },
+  { id: "CD", value: "DR Congo" },
+  { id: "CF", value: "Central African Republic" },
+  { id: "CG", value: "Republic of the Congo" },
+  { id: "CH", value: "Switzerland" },
+  { id: "CI", value: "Ivory Coast" },
+  { id: "CL", value: "Chile" },
+  { id: "CM", value: "Cameroon" },
+  { id: "CN", value: "China" },
+  { id: "CO", value: "Colombia" },
+  { id: "CR", value: "Costa Rica" },
+  { id: "CU", value: "Cuba" },
+  { id: "CV", value: "Cape Verde" },
+  { id: "CY", value: "Cyprus" },
+  { id: "CZ", value: "Czech Republic" },
+  { id: "DE", value: "Germany" },
+  { id: "DJ", value: "Djibouti" },
+  { id: "DK", value: "Denmark" },
+  { id: "DM", value: "Dominica" },
+  { id: "DO", value: "Dominican Republic" },
+  { id: "DZ", value: "Algeria" },
+  { id: "EC", value: "Ecuador" },
+  { id: "EE", value: "Estonia" },
+  { id: "EG", value: "Egypt" },
+  { id: "ER", value: "Eritrea" },
+  { id: "ES", value: "Spain" },
+  { id: "ET", value: "Ethiopia" },
+  { id: "FI", value: "Finland" },
+  { id: "FJ", value: "Fiji" },
+  { id: "FR", value: "France" },
+  { id: "GA", value: "Gabon" },
+  { id: "GB", value: "United Kingdom" },
+  { id: "GD", value: "Grenada" },
+  { id: "GE", value: "Georgia" },
+  { id: "GH", value: "Ghana" },
+  { id: "GM", value: "Gambia" },
+  { id: "GN", value: "Guinea" },
+  { id: "GQ", value: "Equatorial Guinea" },
+  { id: "GR", value: "Greece" },
+  { id: "GT", value: "Guatemala" },
+  { id: "GW", value: "Guinea-Bissau" },
+  { id: "GY", value: "Guyana" },
+  { id: "HN", value: "Honduras" },
+  { id: "HR", value: "Croatia" },
+  { id: "HT", value: "Haiti" },
+  { id: "HU", value: "Hungary" },
+  { id: "ID", value: "Indonesia" },
+  { id: "IE", value: "Ireland" },
+  { id: "IL", value: "Israel" },
+  { id: "IN", value: "India" },
+  { id: "IQ", value: "Iraq" },
+  { id: "IR", value: "Iran" },
+  { id: "IS", value: "Iceland" },
+  { id: "IT", value: "Italy" },
+  { id: "JM", value: "Jamaica" },
+  { id: "JO", value: "Jordan" },
+  { id: "JP", value: "Japan" },
+  { id: "KE", value: "Kenya" },
+  { id: "KG", value: "Kyrgyzstan" },
+  { id: "KH", value: "Cambodia" },
+  { id: "KI", value: "Kiribati" },
+  { id: "KM", value: "Comoros" },
+  { id: "KN", value: "Saint Kitts and Nevis" },
+  { id: "KP", value: "North Korea" },
+  { id: "KR", value: "South Korea" },
+  { id: "KW", value: "Kuwait" },
+  { id: "KZ", value: "Kazakhstan" },
+  { id: "LA", value: "Laos" },
+  { id: "LB", value: "Lebanon" },
+  { id: "LC", value: "Saint Lucia" },
+  { id: "LI", value: "Liechtenstein" },
+  { id: "LK", value: "Sri Lanka" },
+  { id: "LR", value: "Liberia" },
+  { id: "LS", value: "Lesotho" },
+  { id: "LT", value: "Lithuania" },
+  { id: "LU", value: "Luxembourg" },
+  { id: "LV", value: "Latvia" },
+  { id: "LY", value: "Libya" },
+  { id: "MA", value: "Morocco" },
+  { id: "MC", value: "Monaco" },
+  { id: "MD", value: "Moldova" },
+  { id: "ME", value: "Montenegro" },
+  { id: "MG", value: "Madagascar" },
+  { id: "MH", value: "Marshall Islands" },
+  { id: "MK", value: "North Macedonia" },
+  { id: "ML", value: "Mali" },
+  { id: "MM", value: "Myanmar" },
+  { id: "MN", value: "Mongolia" },
+  { id: "MR", value: "Mauritania" },
+  { id: "MT", value: "Malta" },
+  { id: "MU", value: "Mauritius" },
+  { id: "MV", value: "Maldives" },
+  { id: "MW", value: "Malawi" },
+  { id: "MX", value: "Mexico" },
+  { id: "MY", value: "Malaysia" },
+  { id: "MZ", value: "Mozambique" },
+  { id: "NA", value: "Namibia" },
+  { id: "NE", value: "Niger" },
+  { id: "NG", value: "Nigeria" },
+  { id: "NI", value: "Nicaragua" },
+  { id: "NL", value: "Netherlands" },
+  { id: "NO", value: "Norway" },
+  { id: "NP", value: "Nepal" },
+  { id: "NR", value: "Nauru" },
+  { id: "NZ", value: "New Zealand" },
+  { id: "OM", value: "Oman" },
+  { id: "PA", value: "Panama" },
+  { id: "PE", value: "Peru" },
+  { id: "PG", value: "Papua New Guinea" },
+  { id: "PH", value: "Philippines" },
+  { id: "PK", value: "Pakistan" },
+  { id: "PL", value: "Poland" },
+  { id: "PT", value: "Portugal" },
+  { id: "PW", value: "Palau" },
+  { id: "PY", value: "Paraguay" },
+  { id: "QA", value: "Qatar" },
+  { id: "RO", value: "Romania" },
+  { id: "RS", value: "Serbia" },
+  { id: "RU", value: "Russia" },
+  { id: "RW", value: "Rwanda" },
+  { id: "SA", value: "Saudi Arabia" },
+  { id: "SB", value: "Solomon Islands" },
+  { id: "SC", value: "Seychelles" },
+  { id: "SD", value: "Sudan" },
+  { id: "SE", value: "Sweden" },
+  { id: "SG", value: "Singapore" },
+  { id: "SI", value: "Slovenia" },
+  { id: "SK", value: "Slovakia" },
+  { id: "SL", value: "Sierra Leone" },
+  { id: "SM", value: "San Marino" },
+  { id: "SN", value: "Senegal" },
+  { id: "SO", value: "Somalia" },
+  { id: "SR", value: "Suriname" },
+  { id: "SS", value: "South Sudan" },
+  { id: "ST", value: "São Tomé and Príncipe" },
+  { id: "SV", value: "El Salvador" },
+  { id: "SY", value: "Syria" },
+  { id: "SZ", value: "Eswatini" },
+  { id: "TD", value: "Chad" },
+  { id: "TG", value: "Togo" },
+  { id: "TH", value: "Thailand" },
+  { id: "TJ", value: "Tajikistan" },
+  { id: "TL", value: "Timor-Leste" },
+  { id: "TM", value: "Turkmenistan" },
+  { id: "TN", value: "Tunisia" },
+  { id: "TO", value: "Tonga" },
+  { id: "TR", value: "Turkey" },
+  { id: "TT", value: "Trinidad and Tobago" },
+  { id: "TV", value: "Tuvalu" },
+  { id: "TZ", value: "Tanzania" },
+  { id: "UA", value: "Ukraine" },
+  { id: "UG", value: "Uganda" },
+  { id: "US", value: "United States" },
+  { id: "UY", value: "Uruguay" },
+  { id: "UZ", value: "Uzbekistan" },
+  { id: "VA", value: "Vatican City" },
+  { id: "VC", value: "Saint Vincent and the Grenadines" },
+  { id: "VE", value: "Venezuela" },
+  { id: "VN", value: "Vietnam" },
+  { id: "VU", value: "Vanuatu" },
+  { id: "WS", value: "Samoa" },
+  { id: "YE", value: "Yemen" },
+  { id: "ZA", value: "South Africa" },
+  { id: "ZM", value: "Zambia" },
+  { id: "ZW", value: "Zimbabwe" },
+];
+
+function getFlagEmoji(code: string): string {
+  const codePoints = code
+    .toUpperCase()
+    .split("")
+    .map((c) => 127397 + c.charCodeAt(0));
+  return String.fromCodePoint(...codePoints);
+}
+
+export const passportWithEmoji = PASSPORT_LIST.map((p) => ({
+  ...p,
+  value: (
+    <>
+      <span className="text-lg">{getFlagEmoji(p.id)}</span>
+      <span>{p.value}</span>
+      <span className="ml-auto text-xs text-zinc-400 font-mono">{p.id}</span>
+    </>
+  ),
+}));
+
+interface PassportSelectorProps {
+  value: IdValue;
+  onChange: (code: IdValue) => void;
+  disabled?: boolean;
+}
+
+export const PassportSelector: FC<PassportSelectorProps> = (props) => {
+  const { onChange, value, disabled } = props;
+
+  return (
+    <Selector
+      options={passportWithEmoji}
+      onChange={onChange}
+      value={value}
+      disabled={disabled}
+      placeholder="Select passport country…"
+      triggerClassName="min-w-[300px]"
+    />
+  );
+};
