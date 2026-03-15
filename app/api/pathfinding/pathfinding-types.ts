@@ -9,7 +9,7 @@ export interface Coordinate {
   lon: number;
 }
 
-export interface RouteStep {
+export interface PathStep {
   /** Название улицы */
   name: string;
   /** Тип манёвра: turn, depart, arrive, roundabout и т.д. */
@@ -30,10 +30,10 @@ export interface RouteLeg {
   /** Длительность отрезка в секундах */
   durationSec: number;
   /** Пошаговые инструкции */
-  steps: RouteStep[];
+  steps: PathStep[];
 }
 
-export interface RouteResult {
+export interface PathfindingResponse {
   /** Режим передвижения */
   mode: TravelMode;
   /** Общее расстояние в метрах */

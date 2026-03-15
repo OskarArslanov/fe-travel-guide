@@ -2,8 +2,8 @@ import {
   OsrmRouteResponse,
   PathfindingRequest,
   RouteLeg,
-  RouteResult,
-  RouteStep,
+  PathfindingResponse,
+  PathStep,
   TravelMode,
 } from "./pathfinding-types";
 
@@ -18,7 +18,7 @@ export class PathfindingService {
    * @param waypoints  - промежуточные точки (опционально)
    * @param mode       - режим передвижения (car / bike / foot)
    */
-  async buildRoute(request: PathfindingRequest): Promise<RouteResult> {
+  async buildPath(request: PathfindingRequest): Promise<PathfindingResponse> {
     const { from, to, waypoints = [], mode = TravelMode.CAR } = request;
     const allPoints = [from, ...waypoints, to];
     const coords = allPoints.map((p) => `${p.lon},${p.lat}`).join(";");
@@ -49,7 +49,7 @@ export class PathfindingService {
       distanceM: leg.distance,
       durationSec: leg.duration,
       steps: leg.steps.map(
-        (step): RouteStep => ({
+        (step): PathStep => ({
           name: step.name,
           maneuver: step.maneuver.type,
           modifier: step.maneuver.modifier,

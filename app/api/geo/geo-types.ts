@@ -1,4 +1,6 @@
-export interface GeoLocation {
+import { CoordinateType } from "../pathfinding/pathfinding-types";
+
+export type GeoLocationType = {
   /** IP-адрес пользователя */
   ip: string;
   /** ISO 3166-1 alpha-2 код страны (например: "RU", "DE") */
@@ -9,25 +11,14 @@ export interface GeoLocation {
   region: string;
   /** Город */
   city: string;
-  /** Широта */
-  lat: number;
-  /** Долгота */
-  lon: number;
   /** Часовой пояс (например: "Europe/Moscow") */
   timezone: string;
-}
+} & CoordinateType;
 
 /** Ответ от ip-api.com */
-export interface IpApiResponse {
+export type IpApiResponse = {
   status: "success" | "fail";
   message?: string;
-  country: string;
-  countryCode: string;
-  region: string;
   regionName: string;
-  city: string;
-  lat: number;
-  lon: number;
-  timezone: string;
   query: string;
-}
+} & Omit<GeoLocationType, "ip">;

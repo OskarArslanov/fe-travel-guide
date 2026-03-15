@@ -1,11 +1,11 @@
-import { GeoLocation, IpApiResponse } from "./geo-types";
+import { GeoLocationType, IpApiResponse } from "./geo-types";
 
 export class GeoService {
   /**
    * Определяет геолокацию по IP-адресу из входящего HTTP-запроса.
    * Учитывает заголовки прокси: X-Forwarded-For, X-Real-IP.
    */
-  async locateRequest(req: Request): Promise<GeoLocation> {
+  async locateRequest(req: Request): Promise<GeoLocationType> {
     const ip = this.extractIp(req);
     return this.locateIp(ip);
   }
@@ -14,7 +14,7 @@ export class GeoService {
    * Определяет геолокацию по произвольному IP-адресу.
    * Использует бесплатный ip-api.com (без ключа, лимит 45 req/min).
    */
-  async locateIp(ip: string): Promise<GeoLocation> {
+  private async locateIp(ip: string): Promise<GeoLocationType> {
     // При локальном IP получаем реальный внешний IP через ipify
     const resolvedIp = this.isLocalIp(ip) ? await this.resolveExternalIp() : ip;
 
@@ -46,7 +46,7 @@ export class GeoService {
   /**
    * Извлекает реальный IP из запроса с учётом заголовков прокси/балансировщика.
    */
-  extractIp(req: Request): string {
+  private extractIp(req: Request): string {
     const forwarded = req.headers.get("x-forwarded-for");
     if (forwarded) {
       // X-Forwarded-For может содержать цепочку: "client, proxy1, proxy2"

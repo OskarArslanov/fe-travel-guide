@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     "Research visa requirements and get travel suggestions based on your passport and location.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;

@@ -209,7 +209,7 @@ function getFlagEmoji(code: string): string {
   return String.fromCodePoint(...codePoints);
 }
 
-export const passportWithEmoji = PASSPORT_LIST.map((p) => ({
+export const passportWithEmoji: IdValue[] = PASSPORT_LIST.map((p) => ({
   ...p,
   value: (
     <>
@@ -221,7 +221,7 @@ export const passportWithEmoji = PASSPORT_LIST.map((p) => ({
 }));
 
 interface PassportSelectorProps {
-  value: IdValue;
+  value?: IdValue;
   onChange: (code: IdValue) => void;
   disabled?: boolean;
 }

@@ -14,24 +14,18 @@ export async function GET(request: Request) {
     );
   }
 
-  console.log(searchParams);
+  const from = searchParams.get("from");
+  const to = searchParams.get("to");
+  const waypoints = searchParams.get("waypoints");
+  const mode = searchParams.get("mode") as TravelMode | null;
+  
   const parsedRequest: PathfindingRequest = {
-    from: {
-      lat: Number(searchParams.get("fromLat")),
-      lon: Number(searchParams.get("fromLon")),
-    },
-    to: {
-      lat: Number(searchParams.get("toLat")),
-      lon: Number(searchParams.get("toLon")),
-    },
-    waypoints: searchParams.get("waypoints")
-      ? JSON.parse(searchParams.get("waypoints")!)
-      : [],
-    mode: searchParams.get("mode")
-      ? (searchParams.get("mode") as TravelMode)
-      : TravelMode.CAR,
+    from: from ? JSON.parse(from) : undefined,
+    to: to ? JSON.parse(to) : undefined,
+    waypoints: waypoints ? JSON.parse(waypoints) : [],
+    mode: mode ? mode : TravelMode.CAR,
   };
-  const result = await routingService.buildRoute(parsedRequest);
+  const result = await routingService.buildPath(parsedRequest);
 
   return NextResponse.json(result, { status: 200 });
 }

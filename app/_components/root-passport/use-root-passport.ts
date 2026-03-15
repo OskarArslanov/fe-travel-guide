@@ -1,0 +1,38 @@
+import { useQueryParams } from "@/hooks/use-query-params";
+import { useGeoStore } from "@/store/geo.store";
+import { usePathStore } from "@/store/path.store";
+import { useEffect } from "react";
+
+export const useRootPassport = () => {
+  const { geo, isLoading: geoLoading } = useGeoStore();
+  const { fetchPath, error: pathError } = usePathStore();
+  const { getQueryParams, setQueryParams } = useQueryParams();
+  const { passport = geo?.countryCode, limit = "10" } = getQueryParams();
+
+  const handleSetPassport = (passport: string) => {
+    setQueryParams({ passport });
+  };
+
+  const handleSetLimit = (limit: string) => {
+    setQueryParams({ limit });
+  };
+
+  useEffect(() => {
+    if (!passport) return;
+    fetchPath({
+      passport,
+      limit: parseInt(limit),
+      lat: geo?.lat,
+      lon: geo?.lon,
+    });
+  }, [passport, limit, geo]);
+
+  return {
+    geoLoading,
+    pathError,
+    handleSetPassport,
+    handleSetLimit,
+    passport,
+    limit,
+  };
+};
