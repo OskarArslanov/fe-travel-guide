@@ -1,6 +1,5 @@
 "use client";
 
-import { useQueryParams } from "@/hooks/use-query-params";
 import { usePathStore } from "@/store/path.store";
 import {
   useSensors,
@@ -15,8 +14,6 @@ import { useState } from "react";
 export const useRootPathsList = () => {
   const suggestions = usePathStore().path?.suggestions || [];
   const geoLoading = usePathStore().isLoading;
-  const { getQueryParams, setQueryParams } = useQueryParams();
-  const targetCountry = getQueryParams().targetCountry;
 
   const [items, setItems] = useState(suggestions);
 
@@ -48,9 +45,6 @@ export const useRootPathsList = () => {
   return {
     sensors,
     draggableItems,
-    targetCountry,
-    setTargetCountry: (code?: string) =>
-      setQueryParams({ targetCountry: code }),
     handleDragEnd,
     geoLoading,
   };

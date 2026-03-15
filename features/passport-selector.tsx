@@ -3,6 +3,7 @@
 import { FC } from "react";
 import { IdValue } from "../consts/props";
 import { Selector } from "@/components/selector";
+import { getFlagEmoji } from "@/consts/utils";
 
 // Список стран с паспортами (ISO-2 → название)
 const PASSPORT_LIST: IdValue[] = [
@@ -200,14 +201,6 @@ const PASSPORT_LIST: IdValue[] = [
   { id: "ZM", value: "Zambia" },
   { id: "ZW", value: "Zimbabwe" },
 ];
-
-function getFlagEmoji(code: string): string {
-  const codePoints = code
-    .toUpperCase()
-    .split("")
-    .map((c) => 127397 + c.charCodeAt(0));
-  return String.fromCodePoint(...codePoints);
-}
 
 export const passportWithEmoji: IdValue[] = PASSPORT_LIST.map((p) => ({
   ...p,

@@ -9,20 +9,13 @@ import { countryCentroids } from "./root-paths-panel-helpers";
 import { useQueryParams } from "@/hooks/use-query-params";
 import { usePathfindingStore } from "@/store/pathfinding.store";
 import { useGeoStore } from "@/store/geo.store";
+import { getFlagEmoji } from "@/consts/utils";
 
 function formatDuration(minutes: number): string {
   if (minutes < 60) return `${minutes} min`;
   const h = Math.floor(minutes / 60);
   const m = minutes % 60;
   return m > 0 ? `${h}h ${m}m` : `${h}h`;
-}
-
-function getFlagEmoji(code: string): string {
-  const codePoints = code
-    .toUpperCase()
-    .split("")
-    .map((c) => 127397 + c.charCodeAt(0));
-  return String.fromCodePoint(...codePoints);
 }
 
 const MODE_LABELS: Record<TravelMode, { label: string; icon: string }> = {

@@ -31,3 +31,11 @@ export const buildParams = (
   if (paramPairs.length === 0) return "";
   return "?" + paramPairs.join("&");
 };
+
+export function getFlagEmoji(code: string): string {
+  const codePoints = code
+    .toUpperCase()
+    .split("")
+    .map((c) => 127397 + c.charCodeAt(0));
+  return String.fromCodePoint(...codePoints);
+}

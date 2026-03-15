@@ -5,18 +5,12 @@ import {
   SortableContext,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import RouteCard from "../../../../components/RouteCard";
+import RouteCard from "./root-paths-card";
 import { useRootPathsList } from "./use-root-paths-list";
 
 export const RootPathsList = () => {
-  const {
-    handleDragEnd,
-    draggableItems,
-    targetCountry,
-    sensors,
-    setTargetCountry,
-    geoLoading,
-  } = useRootPathsList();
+  const { handleDragEnd, draggableItems, sensors, geoLoading } =
+    useRootPathsList();
 
   if (geoLoading) return <RootPathsListSkeleton />;
 
@@ -32,13 +26,7 @@ export const RootPathsList = () => {
       >
         <div className="flex flex-col gap-2">
           {draggableItems.map((item, idx) => (
-            <RouteCard
-              key={item.countryCode}
-              item={item}
-              index={idx}
-              isSelected={targetCountry === item.countryCode}
-              onSelect={() => setTargetCountry(item.countryCode)}
-            />
+            <RouteCard key={item.countryCode} item={item} index={idx} />
           ))}
         </div>
       </SortableContext>

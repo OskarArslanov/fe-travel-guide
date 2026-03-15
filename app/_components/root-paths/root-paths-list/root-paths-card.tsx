@@ -1,57 +1,18 @@
 "use client";
 
 import { PathType } from "@/app/api/path/path-types";
-import { VisaStatus } from "@/app/api/visa/visa-types";
+import { getFlagEmoji } from "@/consts/utils";
+import { useQueryParams } from "@/hooks/use-query-params";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { visaBadge } from "../root-paths-legend";
 
-interface RouteCardProps {
+interface Props {
   item: PathType;
   index: number;
-  isSelected: boolean;
-  onSelect: () => void;
 }
 
-const VISA_BADGE: Record<
-  VisaStatus,
-  { label: string; className: string }
-> = {
-  [VisaStatus.VISA_FREE]: {
-    label: "Visa Free",
-    className: "bg-emerald-100 text-emerald-700",
-  },
-  [VisaStatus.VISA_ON_ARRIVAL]: {
-    label: "On Arrival",
-    className: "bg-sky-100 text-sky-700",
-  },
-  [VisaStatus.E_VISA]: {
-    label: "e-Visa",
-    className: "bg-violet-100 text-violet-700",
-  },
-  [VisaStatus.VISA_REQUIRED]: {
-    label: "Visa Required",
-    className: "bg-amber-100 text-amber-700",
-  },
-  [VisaStatus.NO_ADMISSION]: {
-    label: "No Entry",
-    className: "bg-red-100 text-red-700",
-  },
-};
-
-function getFlagEmoji(code: string): string {
-  const codePoints = code
-    .toUpperCase()
-    .split("")
-    .map((c) => 127397 + c.charCodeAt(0));
-  return String.fromCodePoint(...codePoints);
-}
-
-export default function RouteCard({
-  item,
-  index,
-  isSelected,
-  onSelect,
-}: RouteCardProps) {
+export default function RoutePathsCard({ item, index }: Props) {
   const {
     attributes,
     listeners,
@@ -60,6 +21,14 @@ export default function RouteCard({
     transition,
     isDragging,
   } = useSortable({ id: item.countryCode });
+  
+  const { getQueryParams, setQueryParams } = useQueryParams();
+  const targetCountry = getQueryParams().targetCountry;
+
+  const isSelected = targetCountry === item.countryCode;
+  const handleSelect = () => {
+    setQueryParams({ targetCountry: item.countryCode });
+  };
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -67,7 +36,7 @@ export default function RouteCard({
     opacity: isDragging ? 0.5 : 1,
   };
 
-  const badge = VISA_BADGE[item.visaStatus];
+  const badge = visaBadge[item.visaStatus];
 
   return (
     <div
@@ -78,7 +47,7 @@ export default function RouteCard({
           ? "border-blue-400 bg-blue-50 shadow-md"
           : "border-zinc-200 bg-white hover:border-zinc-300 hover:shadow-sm"
       } ${isDragging ? "shadow-lg z-50" : ""}`}
-      onClick={onSelect}
+      onClick={handleSelect}
     >
       {/* Drag handle */}
       <button
@@ -99,7 +68,9 @@ export default function RouteCard({
       </span>
 
       {/* Flag */}
-      <span className="text-2xl flex-shrink-0">{getFlagEmoji(item.countryCode)}</span>
+      <span className="text-2xl flex-shrink-0">
+        {getFlagEmoji(item.countryCode)}
+      </span>
 
       {/* Info */}
       <div className="flex-1 min-w-0">
