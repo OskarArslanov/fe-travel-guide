@@ -12,7 +12,7 @@ interface Props {
   index: number;
 }
 
-export default function RoutePathsCard({ item, index }: Props) {
+export const RootPathsCard = ({ item, index }: Props) => {
   const {
     attributes,
     listeners,
@@ -21,7 +21,7 @@ export default function RoutePathsCard({ item, index }: Props) {
     transition,
     isDragging,
   } = useSortable({ id: item.countryCode });
-  
+
   const { getQueryParams, setQueryParams } = useQueryParams();
   const targetCountry = getQueryParams().targetCountry;
 
@@ -85,7 +85,7 @@ export default function RoutePathsCard({ item, index }: Props) {
           </span>
         </div>
         <div className="flex items-center gap-3 mt-0.5 text-xs text-zinc-400">
-          <span>✈ {item.distanceFromPrevKm.toLocaleString()} km</span>
+          <span>✈ {item.distanceKm.toLocaleString()} km</span>
           {item.allowedDays && <span>🗓 {item.allowedDays}d stay</span>}
           <span className="font-mono">score {item.score}</span>
         </div>
@@ -105,4 +105,4 @@ export default function RoutePathsCard({ item, index }: Props) {
       )}
     </div>
   );
-}
+};

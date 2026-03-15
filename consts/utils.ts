@@ -32,6 +32,15 @@ export const buildParams = (
   return "?" + paramPairs.join("&");
 };
 
+export const parseParams = (url: string) => {
+  const result: Record<string, string> = {};
+  const searchParams = new URL(url).searchParams;
+  searchParams.forEach((value, key) => {
+    result[key] = value;
+  });
+  return result;
+};
+
 export function getFlagEmoji(code: string): string {
   const codePoints = code
     .toUpperCase()

@@ -5,16 +5,17 @@ export type PathType = {
   countryName: string;
   visaStatus: VisaStatus;
   allowedDays: number | null;
+  /** Расстояние от origin (для suggest) или от предыдущей точки (для suggestChain) */
   distanceKm: number;
-  distanceFromPrevKm: number;
   score: number;
 };
 
 export type PathRequest = {
   passport: string;
-  lat?: number;
-  lon?: number;
+  lat: number;
+  lon: number;
   limit?: number;
+  currenctCountryCode?: string;
 };
 
 export type PathResponse = {
@@ -22,5 +23,13 @@ export type PathResponse = {
   lat: number;
   lon: number;
   suggestions: PathType[];
+  total: number;
+};
+
+export type ChainResponse = {
+  passport: string;
+  lat: number;
+  lon: number;
+  chain: PathType[];
   total: number;
 };

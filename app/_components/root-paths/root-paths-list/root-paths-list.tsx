@@ -1,36 +1,20 @@
 "use client";
 
-import { DndContext, closestCenter } from "@dnd-kit/core";
-import {
-  SortableContext,
-  verticalListSortingStrategy,
-} from "@dnd-kit/sortable";
-import RouteCard from "./root-paths-card";
-import { useRootPathsList } from "./use-root-paths-list";
+import { usePathStore } from "@/store/path.store";
+import { RootPathsCard } from "./root-paths-card";
 
 export const RootPathsList = () => {
-  const { handleDragEnd, draggableItems, sensors, geoLoading } =
-    useRootPathsList();
+  const { path, isLoading } = usePathStore();
+  const suggestions = path?.suggestions || [];
 
-  if (geoLoading) return <RootPathsListSkeleton />;
+  if (isLoading) return <RootPathsListSkeleton />;
 
   return (
-    <DndContext
-      sensors={sensors}
-      collisionDetection={closestCenter}
-      onDragEnd={handleDragEnd}
-    >
-      <SortableContext
-        items={draggableItems.map((i) => i.countryCode)}
-        strategy={verticalListSortingStrategy}
-      >
-        <div className="flex flex-col gap-2">
-          {draggableItems.map((item, idx) => (
-            <RouteCard key={item.countryCode} item={item} index={idx} />
-          ))}
-        </div>
-      </SortableContext>
-    </DndContext>
+    <div className="flex flex-col gap-2">
+      {suggestions.map((item, idx) => (
+        <RootPathsCard key={item.countryCode} item={item} index={idx} />
+      ))}
+    </div>
   );
 };
 

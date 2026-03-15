@@ -6,7 +6,7 @@ import { fetchPath } from "@/store/api/path.api";
 import { StoreProps } from "@/consts/props";
 
 type PathStoreType = {
-  fetchPath: (request: PathRequest) => Promise<void>;
+  fetchPath: (request: Partial<PathRequest>) => Promise<void>;
   path?: PathResponse;
 } & StoreProps;
 

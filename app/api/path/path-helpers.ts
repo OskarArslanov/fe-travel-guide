@@ -3,6 +3,8 @@ import { VisaStatus } from "../visa/visa-types";
 import {
   PathType,
   PathResponse,
+  ChainResponse,
+  PathRequest,
 } from "./path-types";
 
 /**
@@ -221,60 +223,66 @@ const MAX_DISTANCE_KM = 8000;
 const MAX_DAYS = 365;
 
 export class PathService {
-  async suggest(
+  /**
+   * Возвращает топ-N стран, отсортированных по score относительно ТЕКУЩЕЙ точки.
+   * distanceKm — расстояние от origin до каждой страны независимо.
+   */
+  async suggest(request: PathRequest): Promise<PathResponse> {
+    const { passport, currenctCountryCode, lat, limit, lon } = request;
+    const candidates = (await this.buildCandidates(passport, lat, lon)).filter(
+      (c) => c.countryCode !== currenctCountryCode,
+    );
+
+    const sorted = candidates
+      .map((c) => {
+        const score = this.calcScore(
+          c.visaStatus,
+          c.allowedDays,
+          c.distanceFromOriginKm,
+        );
+        return { ...c, score };
+      })
+      .sort((a, b) => b.score - a.score)
+      .slice(0, limit);
+
+    const suggestions: PathType[] = sorted.map((c) => ({
+      countryCode: c.countryCode,
+      countryName: c.countryName,
+      visaStatus: c.visaStatus,
+      allowedDays: c.allowedDays,
+      distanceKm: Math.round(c.distanceFromOriginKm),
+      score: Math.round(c.score * 10) / 10,
+    }));
+
+    return {
+      passport: passport.toUpperCase(),
+      lat,
+      lon,
+      suggestions,
+      total: suggestions.length,
+    };
+  }
+
+  /**
+   * Строит жадную цепочку маршрута.
+   * distanceKm — расстояние от ПРЕДЫДУЩЕЙ точки цепи (или от origin для первой).
+   */
+  async suggestChain(
     passport: string,
     lat: number,
     lon: number,
     limit = 20,
-  ): Promise<PathResponse> {
-    const visaInfo = await visaService.getVisaInfo(passport);
+  ): Promise<ChainResponse> {
+    const candidates = await this.buildCandidates(passport, lat, lon);
 
-    // Собираем всех кандидатов с их базовыми данными
-    type Candidate = {
-      countryCode: string;
-      countryName: string;
-      visaStatus: VisaStatus;
-      allowedDays: number | null;
-      centroid: [number, number];
-      distanceFromOriginKm: number;
-    };
-
-    const candidates: Candidate[] = visaInfo.entries
-      .filter((entry) => entry.status !== VisaStatus.NO_ADMISSION)
-      .flatMap((entry) => {
-        const centroid = COUNTRY_CENTROIDS[entry.destination];
-        if (!centroid) return [];
-        return [
-          {
-            countryCode: entry.destination,
-            countryName: entry.destinationName,
-            visaStatus: entry.status,
-            allowedDays: entry.allowedDays ?? null,
-            centroid,
-            distanceFromOriginKm: this.haversineKm(
-              lat,
-              lon,
-              centroid[0],
-              centroid[1],
-            ),
-          },
-        ];
-      });
-
-    /**
-     * Жадный алгоритм построения цепочки:
-     * На каждом шаге из оставшихся кандидатов выбираем того,
-     * у кого наибольший score относительно ПРЕДЫДУЩЕЙ точки маршрута.
-     */
     const chain: PathType[] = [];
     const remaining = new Set(candidates);
 
-    // Текущая позиция — начальная локация пользователя
     let prevLat = lat;
     let prevLon = lon;
 
     while (chain.length < limit && remaining.size > 0) {
-      let bestCandidate: Candidate | null = null;
+      let bestCandidate: (typeof candidates)[number] | null = null;
       let bestScore = -Infinity;
 
       for (const candidate of remaining) {
@@ -296,7 +304,6 @@ export class PathService {
       }
 
       if (!bestCandidate) break;
-
       remaining.delete(bestCandidate);
 
       const distFromPrev = this.haversineKm(
@@ -311,12 +318,10 @@ export class PathService {
         countryName: bestCandidate.countryName,
         visaStatus: bestCandidate.visaStatus,
         allowedDays: bestCandidate.allowedDays,
-        distanceKm: Math.round(bestCandidate.distanceFromOriginKm),
-        distanceFromPrevKm: Math.round(distFromPrev),
+        distanceKm: Math.round(distFromPrev),
         score: Math.round(bestScore * 10) / 10,
       });
 
-      // Следующий шаг начинается из этой страны
       prevLat = bestCandidate.centroid[0];
       prevLon = bestCandidate.centroid[1];
     }
@@ -325,16 +330,43 @@ export class PathService {
       passport: passport.toUpperCase(),
       lat,
       lon,
-      suggestions: chain,
+      chain,
       total: chain.length,
     };
+  }
+
+  /** Собирает кандидатов с визовой информацией и центроидами */
+  private async buildCandidates(passport: string, lat: number, lon: number) {
+    const visaInfo = await visaService.getVisaInfo(passport);
+
+    return visaInfo.entries
+      .filter((entry) => entry.status !== VisaStatus.NO_ADMISSION)
+      .flatMap((entry) => {
+        const centroid = COUNTRY_CENTROIDS[entry.destination];
+        if (!centroid) return [];
+        return [
+          {
+            countryCode: entry.destination,
+            countryName: entry.destinationName,
+            visaStatus: entry.status,
+            allowedDays: entry.allowedDays ?? null,
+            centroid,
+            distanceFromOriginKm: this.haversineKm(
+              lat,
+              lon,
+              centroid[0],
+              centroid[1],
+            ),
+          },
+        ];
+      });
   }
 
   /**
    * Формула оценки:
    *  - 35% — визовый статус (0–100 баллов)
    *  - 10% — срок пребывания (0–100 баллов, нормализованный по MAX_DAYS)
-   *  - 55% — близость к предыдущей точке маршрута
+   *  - 55% — близость к текущей точке
    */
   private calcScore(
     status: VisaStatus,
@@ -355,7 +387,7 @@ export class PathService {
       (1 - distanceKm / MAX_DISTANCE_KM) * 100,
     );
 
-    return visaScore * 0.35 + daysScore * 0.10 + proximityScore * 0.55;
+    return visaScore * 0.35 + daysScore * 0.1 + proximityScore * 0.55;
   }
 
   /**
