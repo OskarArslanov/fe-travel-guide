@@ -26,7 +26,6 @@ class VisaService {
       throw Error(`Passport code "${code}" not found`);
     }
 
-    console.log(passportData);
     const entries: VisaEntry[] = Object.entries(passportData)
       .filter(([destination]) => destination !== code)
       .map(([destination, record]) => {

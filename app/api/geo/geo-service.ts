@@ -22,7 +22,6 @@ class GeoService {
     const url = `http://ip-api.com/json/${resolvedIp}?fields=status,message,country,countryCode,region,regionName,city,lat,lon,timezone,query`;
 
     const resp = (await baseFetch(url)) as IpApiResponse;
-    console.log(resp);
     return {
       ip: resp.query,
       countryCode: resp.countryCode,
