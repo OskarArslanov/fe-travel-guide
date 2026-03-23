@@ -10,13 +10,26 @@ export type PathType = {
   score: number;
 };
 
+export type PathFilterRequest = {
+  /** Поле сортировки. По умолчанию: "score" */
+  sortBy?: "visa" | "distance" | "score";
+  /** Фильтр по визовому статусу. По умолчанию: "all" */
+  type?: VisaStatus | "all";
+  /** Минимум дней пребывания */
+  minDays?: number;
+  /** Включать страны без данных о днях. По умолчанию: true */
+  includeNoDays?: boolean;
+  /** Направление сортировки. По умолчанию: "desc" */
+  sort?: "asc" | "desc";
+};
+
 export type PathRequest = {
   passport: string;
   lat: number;
   lon: number;
   limit?: number;
   currentCountryCode: string;
-};
+} & PathFilterRequest;
 
 export type PathResponse = {
   passport: string;

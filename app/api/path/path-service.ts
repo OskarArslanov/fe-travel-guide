@@ -228,24 +228,58 @@ export class PathService {
    * distanceKm — расстояние от origin до каждой страны независимо.
    */
   async suggest(request: PathRequest): Promise<PathResponse> {
-    const { passport, currentCountryCode, lat, limit, lon } = request;
-    const candidates = (await this.buildCandidates(passport, lat, lon)).filter(
+    const {
+      passport,
+      currentCountryCode,
+      lat,
+      lon,
+      limit,
+      sortBy = "score",
+      type = "all",
+      minDays,
+      includeNoDays = true,
+      sort = "desc",
+    } = request;
+
+    let candidates = (await this.buildCandidates(passport, lat, lon)).filter(
       (c) => c.countryCode !== currentCountryCode,
     );
 
-    const sorted = candidates
-      .map((c) => {
-        const score = this.calcScore(
-          c.visaStatus,
-          c.allowedDays,
-          c.distanceFromOriginKm,
-        );
-        return { ...c, score };
-      })
-      .sort((a, b) => b.score - a.score)
-      .slice(0, limit);
+    // Фильтр по визовому статусу
+    if (type !== "all") {
+      candidates = candidates.filter((c) => c.visaStatus === type);
+    }
 
-    const suggestions: PathType[] = sorted.map((c) => ({
+    // Фильтр по минимальному сроку пребывания
+    if (minDays !== undefined) {
+      candidates = candidates.filter(
+        (c) => c.allowedDays !== null && c.allowedDays >= minDays,
+      );
+    } else if (!includeNoDays) {
+      // Исключаем страны без данных о сроке пребывания
+      candidates = candidates.filter((c) => c.allowedDays !== null);
+    }
+
+    const withScore = candidates.map((c) => ({
+      ...c,
+      score: this.calcScore(c.visaStatus, c.allowedDays, c.distanceFromOriginKm),
+    }));
+
+    // Сортировка
+    const dir = sort === "asc" ? 1 : -1;
+    withScore.sort((a, b) => {
+      switch (sortBy) {
+        case "visa":
+          return dir * (VISA_STATUS_SCORE[b.visaStatus] - VISA_STATUS_SCORE[a.visaStatus]);
+        case "distance":
+          return dir * (a.distanceFromOriginKm - b.distanceFromOriginKm);
+        case "score":
+        default:
+          return dir * (b.score - a.score);
+      }
+    });
+
+    const suggestions: PathType[] = withScore.slice(0, limit).map((c) => ({
       countryCode: c.countryCode,
       countryName: c.countryName,
       visaStatus: c.visaStatus,
@@ -337,8 +371,7 @@ export class PathService {
 
   /** Собирает кандидатов с визовой информацией и центроидами */
   private async buildCandidates(passport: string, lat: number, lon: number) {
-    const visaService = await getVisaService();
-    const visaInfo = await visaService.getVisaInfo(passport);
+    const visaInfo = await getVisaService().getVisaInfo(passport);
 
     return visaInfo.entries
       .filter((entry) => entry.status !== VisaStatus.NO_ADMISSION)

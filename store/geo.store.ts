@@ -23,7 +23,6 @@ export const useGeoStore = create<GeoStoreType>()((set) => ({
       if (e instanceof FetchError) {
         console.error("Failed to fetch geo:", e, e.message, e.data);
       }
-      console.error("Failed to fetch geo123:", e, e.message, e.data);
       useAlertStore.getState().addAlert({
         message:
           "Не удалось определить геолокацию. Проверьте соединение с интернетом.",

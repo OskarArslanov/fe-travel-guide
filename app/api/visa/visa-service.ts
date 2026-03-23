@@ -1,5 +1,4 @@
-'use server';
-
+import { baseFetch } from "@/consts/base-fetch";
 import {
   RawPassportIndex,
   VisaInfoResponseType,
@@ -7,7 +6,6 @@ import {
   VISA_STATUS_RANK,
   VisaStatus,
 } from "./visa-types";
-import { getWikiVisaDaysService } from "./wiki-visa-days";
 
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 
@@ -28,23 +26,17 @@ class VisaService {
       throw Error(`Passport code "${code}" not found`);
     }
 
+    console.log(passportData);
     const entries: VisaEntry[] = Object.entries(passportData)
       .filter(([destination]) => destination !== code)
-      .map(([destination, record]) => ({
-        destination: destination.toUpperCase(),
-        destinationName: this.getCountryName(destination),
-        status: this.parseStatus(record.status),
-        allowedDays: record.days ?? null,
-      }));
-
-    await getWikiVisaDaysService()
-      .getAllDays(code)
-      .then((daysMap) => {
-        entries.forEach((entry) => {
-          if (entry.allowedDays === null && daysMap[entry.destination]) {
-            entry.allowedDays = daysMap[entry.destination];
-          }
-        });
+      .map(([destination, record]) => {
+        const status = this.parseStatus(record.status);
+        return {
+          destination: destination.toUpperCase(),
+          destinationName: this.getCountryName(destination),
+          status,
+          allowedDays: this.parseAllowedDays(status, record.days),
+        };
       });
 
     entries.sort((a, b) => {
@@ -68,23 +60,27 @@ class VisaService {
 
   private async refreshCache(): Promise<void> {
     try {
-      const resp = await fetch(DATA_URL);
-      if (!resp.ok) {
-        throw new Error(`HTTP ${resp.status}: ${resp.statusText}`);
-      }
-
-      const data = await resp.json();
-      this.cache = data as RawPassportIndex;
+      const resp = await baseFetch(DATA_URL);
+      this.cache = resp as RawPassportIndex;
       this.cacheUpdatedAt = Date.now();
     } catch (error: unknown) {
       console.error("Failed to refresh passport index cache", error);
-      // Если кэш уже есть — продолжаем работать со старыми данными
       if (Object.keys(this.cache).length === 0) {
         throw error;
       }
     }
   }
 
+  /**
+   * Маппинг статуса въезда из сырой строки датасета.
+   *
+   * Значения в passport-index-data:
+   *   "visa free"       — безвизовый въезд
+   *   "visa on arrival" — виза по прилёту
+   *   "eta" / "e-visa"  — электронное разрешение / е-виза
+   *   "visa required"   — нужна обычная виза
+   *   "no admission"    — въезд запрещён
+   */
   private parseStatus(raw: string): VisaStatus {
     switch (raw.trim().toLowerCase()) {
       case "visa free":
@@ -100,9 +96,29 @@ class VisaService {
       case "no admission":
         return VisaStatus.NO_ADMISSION;
       default:
-        console.warn(`Unknown visa status: "${raw}"`);
+        console.warn(`[VisaService] Unknown status: "${raw}"`);
         return VisaStatus.VISA_REQUIRED;
     }
+  }
+
+  /**
+   * Маппинг количества разрешённых дней пребывания.
+   *
+   * Правила:
+   * - VISA_FREE / VISA_ON_ARRIVAL / E_VISA + days=N → N дней
+   * - VISA_FREE + days=null → безлимитный/неизвестный срок, возвращаем null
+   *   (например BY для RU — союзное государство, ограничений нет)
+   * - VISA_REQUIRED + days=N → специальный режим (напр. HK для CN = 7 дней
+   *   по HKID), сохраняем как есть — это реальное ограниченное разрешение
+   * - VISA_REQUIRED + days=null → виза нужна, срок неизвестен до выдачи → null
+   * - NO_ADMISSION → всегда null
+   */
+  private parseAllowedDays(
+    status: VisaStatus,
+    days: number | undefined,
+  ): number | null {
+    if (status === VisaStatus.NO_ADMISSION) return null;
+    return days ?? null;
   }
 
   private getCountryName(code: string): string {
@@ -120,7 +136,7 @@ class VisaService {
 
 let visaService: VisaService | null = null;
 
-export const getVisaService = async (): Promise<VisaService> => {
+export const getVisaService = (): VisaService => {
   if (!visaService) {
     visaService = new VisaService();
   }

@@ -1,3 +1,4 @@
+import { baseFetch } from "@/consts/base-fetch";
 import {
   OsrmRouteResponse,
   PathfindingRequest,
@@ -27,21 +28,8 @@ class PathfindingService {
       `${OSRM_BASE}/route/v1/${mode}/${coords}` +
       `?overview=full&geometries=geojson&steps=true`;
 
-    const resp = await fetch(url);
-
-    if (!resp.ok) {
-      throw new Error(`OSRM responded with HTTP ${resp.status}`);
-    }
-
-    const data = (await resp.json()) as OsrmRouteResponse;
-
-    if (data.code !== "Ok") {
-      throw new Error(
-        `OSRM routing failed: ${data.code}${data.message ? ` — ${data.message}` : ""}`,
-      );
-    }
-
-    const route = data.routes[0];
+    const resp = (await baseFetch(url)) as OsrmRouteResponse;
+    const route = resp.routes[0];
 
     const legs: RouteLeg[] = route.legs.map((leg) => ({
       distanceM: leg.distance,
@@ -77,4 +65,4 @@ export const getPathfindingService = async (): Promise<PathfindingService> => {
     routingService = new PathfindingService();
   }
   return routingService;
-}
+};

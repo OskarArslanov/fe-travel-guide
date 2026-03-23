@@ -26,8 +26,11 @@ export const RootPathsCard = ({ item, index }: Props) => {
   const targetCountry = getQueryParams().targetCountry;
 
   const isSelected = targetCountry === item.countryCode;
+
   const handleSelect = () => {
-    setQueryParams({ targetCountry: item.countryCode });
+    setQueryParams({
+      targetCountry: isSelected ? undefined : item.countryCode,
+    });
   };
 
   const style = {

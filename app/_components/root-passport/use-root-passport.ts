@@ -1,3 +1,4 @@
+import { VisaStatus } from "@/app/api/visa/visa-types";
 import { useQueryParams } from "@/hooks/use-query-params";
 import { useGeoStore } from "@/store/geo.store";
 import { usePathStore } from "@/store/path.store";
@@ -7,7 +8,15 @@ export const useRootPassport = () => {
   const { geo, isLoading: geoLoading } = useGeoStore();
   const fetchPath = usePathStore().fetchPath;
   const { getQueryParams, setQueryParams } = useQueryParams();
-  const { passport = geo?.countryCode, limit = "20" } = getQueryParams();
+  const {
+    passport = geo?.countryCode,
+    limit = "20",
+    sortBy = "score",
+    type = "all",
+    minDays,
+    includeNoDays = "true",
+    sort = "asc",
+  } = getQueryParams();
 
   const handleSetPassport = (passport: string) => {
     setQueryParams({ passport });
@@ -15,6 +24,26 @@ export const useRootPassport = () => {
 
   const handleSetLimit = (limit: string) => {
     setQueryParams({ limit });
+  };
+
+  const handleSetSortBy = (value: string) => {
+    setQueryParams({ sortBy: value });
+  };
+
+  const handleSetType = (value: string) => {
+    setQueryParams({ type: value });
+  };
+
+  const handleSetMinDays = (value: string | undefined) => {
+    setQueryParams({ minDays: value });
+  };
+
+  const handleSetIncludeNoDays = (value: boolean) => {
+    setQueryParams({ includeNoDays: String(value) });
+  };
+
+  const handleSetSort = (value: string) => {
+    setQueryParams({ sort: value });
   };
 
   useEffect(() => {
@@ -25,14 +54,29 @@ export const useRootPassport = () => {
       lat: geo.lat,
       lon: geo.lon,
       currentCountryCode: geo.countryCode,
+      sortBy: sortBy as "visa" | "distance" | "score",
+      type: type as VisaStatus | "all",
+      minDays: minDays ? parseInt(minDays) : undefined,
+      includeNoDays: includeNoDays === "true",
+      sort: sort as "asc" | "desc",
     });
-  }, [passport, limit, geo]);
+  }, [passport, limit, sortBy, type, minDays, includeNoDays, sort, geo]);
 
   return {
     geoLoading,
-    handleSetPassport,
-    handleSetLimit,
     passport,
     limit,
+    sortBy,
+    type,
+    minDays,
+    includeNoDays: includeNoDays === "true",
+    sort,
+    handleSetPassport,
+    handleSetLimit,
+    handleSetSortBy,
+    handleSetType,
+    handleSetMinDays,
+    handleSetIncludeNoDays,
+    handleSetSort,
   };
 };

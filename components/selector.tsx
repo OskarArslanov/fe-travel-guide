@@ -3,7 +3,7 @@
 import { IdValue } from "@/consts/props";
 import { cn } from "@/consts/utils";
 import { useClickOutside } from "@/hooks/use-click-outside";
-import { useState, useRef, FC, useMemo } from "react";
+import { useState, useRef, FC, useMemo, ReactNode } from "react";
 
 interface Props {
   value?: IdValue;
@@ -13,6 +13,7 @@ interface Props {
   disabled?: boolean;
   wrapperClassName?: string;
   triggerClassName?: string;
+  element?: (option: IdValue) => ReactNode;
 }
 
 export const Selector: FC<Props> = (props) => {
@@ -24,6 +25,7 @@ export const Selector: FC<Props> = (props) => {
     options,
     wrapperClassName,
     triggerClassName,
+    element,
   } = props;
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
@@ -54,6 +56,8 @@ export const Selector: FC<Props> = (props) => {
     setQuery("");
   };
 
+  const displayValue = element ? element(value as IdValue) : value?.value;
+
   return (
     <div ref={ref} className={cn("relative max-w-sm", wrapperClassName)}>
       <button
@@ -61,12 +65,12 @@ export const Selector: FC<Props> = (props) => {
         disabled={disabled}
         onClick={() => setOpen((o) => !o)}
         className={cn(
-          "w-full flex items-center gap-3 px-4 py-3 bg-white border border-zinc-200 rounded-xl shadow-sm hover:border-zinc-400 transition-colors disabled:opacity-60 disabled:cursor-not-allowed",
+          "w-full flex items-center justify-between gap-3 px-4 py-3 bg-white border border-zinc-200 rounded-xl shadow-sm hover:border-zinc-400 transition-colors disabled:opacity-60 disabled:cursor-not-allowed",
           triggerClassName,
         )}
       >
         {value ? (
-          value.value
+          displayValue
         ) : (
           <span className="text-zinc-400">{placeholder}</span>
         )}
@@ -109,7 +113,7 @@ export const Selector: FC<Props> = (props) => {
                       : "text-zinc-800"
                   }`}
                 >
-                  {p.value}
+                  {element ? element(p) : p.value}
                 </button>
               </li>
             ))}

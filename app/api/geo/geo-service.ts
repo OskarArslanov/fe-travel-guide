@@ -22,7 +22,7 @@ class GeoService {
     const url = `http://ip-api.com/json/${resolvedIp}?fields=status,message,country,countryCode,region,regionName,city,lat,lon,timezone,query`;
 
     const resp = (await baseFetch(url)) as IpApiResponse;
-
+    console.log(resp);
     return {
       ip: resp.query,
       countryCode: resp.countryCode,
@@ -61,9 +61,8 @@ class GeoService {
   /** Определяет внешний IP сервера через api.ipify.org */
   private async resolveExternalIp(): Promise<string> {
     try {
-      const resp = await fetch("https://api.ipify.org?format=json");
-      const data = (await resp.json()) as { ip: string };
-      return data.ip;
+      const resp = await baseFetch("https://api.ipify.org?format=json");
+      return (resp as { ip: string }).ip;
     } catch {
       console.warn("Failed to resolve external IP, falling back to 127.0.0.1");
       return "127.0.0.1";
@@ -89,4 +88,4 @@ export const getGeoService = async (): Promise<GeoService> => {
     geoService = new GeoService();
   }
   return geoService;
-}
+};

@@ -6,7 +6,7 @@ import { Selector } from "@/components/selector";
 import { getFlagEmoji } from "@/consts/utils";
 
 // Список стран с паспортами (ISO-2 → название)
-const PASSPORT_LIST: IdValue[] = [
+export const PASSPORT_LIST: IdValue[] = [
   { id: "AD", value: "Andorra" },
   { id: "AE", value: "United Arab Emirates" },
   { id: "AF", value: "Afghanistan" },
@@ -202,17 +202,6 @@ const PASSPORT_LIST: IdValue[] = [
   { id: "ZW", value: "Zimbabwe" },
 ];
 
-export const passportWithEmoji: IdValue[] = PASSPORT_LIST.map((p) => ({
-  ...p,
-  value: (
-    <>
-      <span className="text-lg">{getFlagEmoji(p.id)}</span>
-      <span>{p.value}</span>
-      <span className="ml-auto text-xs text-zinc-400 font-mono">{p.id}</span>
-    </>
-  ),
-}));
-
 interface PassportSelectorProps {
   value?: IdValue;
   onChange: (code: IdValue) => void;
@@ -224,12 +213,21 @@ export const PassportSelector: FC<PassportSelectorProps> = (props) => {
 
   return (
     <Selector
-      options={passportWithEmoji}
+      options={PASSPORT_LIST}
       onChange={onChange}
       value={value}
       disabled={disabled}
       placeholder="Select passport country…"
       triggerClassName="min-w-[300px]"
+      element={(opt) => (
+        <>
+          <span className="text-lg">{getFlagEmoji(opt.id)}</span>
+          <span>{opt.value}</span>
+          <span className="ml-auto text-xs text-zinc-400 font-mono">
+            {opt.id}
+          </span>
+        </>
+      )}
     />
   );
 };
