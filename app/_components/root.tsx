@@ -9,8 +9,7 @@ import { usePathStore } from "@/store/path.store";
 
 export const Root = () => {
   const geoLoading = useGeoStore().isLoading;
-  const { path, error } = usePathStore();
-
+  const { path } = usePathStore();
 
   return (
     <div className="min-h-screen bg-zinc-50">
@@ -18,7 +17,7 @@ export const Root = () => {
       <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
         <RootPassport />
         <RootPaths />
-        {!geoLoading && path?.suggestions.length === 0 && !error && (
+        {!geoLoading && path?.suggestions.length === 0 && (
           <RootInit />
         )}
       </main>

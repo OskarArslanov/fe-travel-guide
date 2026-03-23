@@ -5,9 +5,9 @@ import { useEffect } from "react";
 
 export const useRootPassport = () => {
   const { geo, isLoading: geoLoading } = useGeoStore();
-  const { fetchPath, error: pathError } = usePathStore();
+  const fetchPath = usePathStore().fetchPath;
   const { getQueryParams, setQueryParams } = useQueryParams();
-  const { passport = geo?.countryCode, limit = "10" } = getQueryParams();
+  const { passport = geo?.countryCode, limit = "20" } = getQueryParams();
 
   const handleSetPassport = (passport: string) => {
     setQueryParams({ passport });
@@ -30,7 +30,6 @@ export const useRootPassport = () => {
 
   return {
     geoLoading,
-    pathError,
     handleSetPassport,
     handleSetLimit,
     passport,

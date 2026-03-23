@@ -32,7 +32,7 @@ export const RootPathsPanel = () => {
 
   const targetCountry = useQueryParams().getQueryParams().targetCountry;
 
-  const { findPath, isLoading, path: result, error } = usePathfindingStore();
+  const { findPath, isLoading, path: result } = usePathfindingStore();
   const [mode, setMode] = useState<TravelMode>(TravelMode.CAR);
 
   const { from, to, canBuildRoute } = useMemo(() => {
@@ -127,12 +127,6 @@ export const RootPathsPanel = () => {
           >
             {isLoading ? "Building route…" : "Find route"}
           </button>
-
-          {error && (
-            <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
-              ⚠ {JSON.stringify(error)}
-            </div>
-          )}
 
           {result && (
             <div className="flex flex-col gap-3">

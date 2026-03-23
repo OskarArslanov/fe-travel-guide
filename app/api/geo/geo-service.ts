@@ -84,9 +84,9 @@ class GeoService {
 
 let geoService: GeoService | null = null;
 
-export const getGeoService = (): GeoService => {
+export const getGeoService = async (): Promise<GeoService> => {
   if (!geoService) {
     geoService = new GeoService();
   }
   return geoService;
-};
+}

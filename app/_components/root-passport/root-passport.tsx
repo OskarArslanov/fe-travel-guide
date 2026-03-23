@@ -19,7 +19,6 @@ export const RootPassport = () => {
     geoLoading,
     handleSetLimit,
     handleSetPassport,
-    pathError,
     passport,
     limit,
   } = useRootPassport();
@@ -50,11 +49,6 @@ export const RootPassport = () => {
           </div>
         </div>
       </div>
-      {!!pathError && (
-        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">
-          ⚠ Failed to build route: {String(pathError)}
-        </div>
-      )}
     </section>
   );
 };

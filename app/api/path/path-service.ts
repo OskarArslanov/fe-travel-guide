@@ -337,7 +337,8 @@ export class PathService {
 
   /** Собирает кандидатов с визовой информацией и центроидами */
   private async buildCandidates(passport: string, lat: number, lon: number) {
-    const visaInfo = await getVisaService().getVisaInfo(passport);
+    const visaService = await getVisaService();
+    const visaInfo = await visaService.getVisaInfo(passport);
 
     return visaInfo.entries
       .filter((entry) => entry.status !== VisaStatus.NO_ADMISSION)
@@ -420,9 +421,9 @@ export class PathService {
 
 let pathService: PathService | null = null;
 
-export const getPathService = (): PathService => {
+export const getPathService = async (): Promise<PathService> => {
   if (!pathService) {
     pathService = new PathService();
   }
   return pathService;
-};
+}

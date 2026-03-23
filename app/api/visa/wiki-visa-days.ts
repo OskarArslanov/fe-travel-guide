@@ -1,3 +1,5 @@
+import "server-only";
+
 /**
  * Сервис для автоматического получения количества дней пребывания
  * из Wikipedia: "Visa requirements for X citizens".

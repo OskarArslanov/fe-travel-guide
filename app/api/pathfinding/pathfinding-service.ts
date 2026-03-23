@@ -72,9 +72,9 @@ class PathfindingService {
 
 let routingService: PathfindingService | null = null;
 
-export const getPathfindingService = (): PathfindingService => {
+export const getPathfindingService = async (): Promise<PathfindingService> => {
   if (!routingService) {
     routingService = new PathfindingService();
   }
   return routingService;
-};
+}

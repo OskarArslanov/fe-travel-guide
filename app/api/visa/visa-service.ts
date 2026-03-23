@@ -1,3 +1,5 @@
+'use server';
+
 import {
   RawPassportIndex,
   VisaInfoResponseType,
@@ -118,7 +120,7 @@ class VisaService {
 
 let visaService: VisaService | null = null;
 
-export const getVisaService = (): VisaService => {
+export const getVisaService = async (): Promise<VisaService> => {
   if (!visaService) {
     visaService = new VisaService();
   }

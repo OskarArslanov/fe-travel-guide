@@ -15,9 +15,6 @@ export const RootPathsTitle = () => {
             {path?.passport || "N/A"}
           </span>
         </span>
-        <span className="text-xs text-zinc-400 bg-zinc-100 px-2 py-1 rounded-lg">
-          Drag to reorder
-        </span>
       </div>
     </div>
   );

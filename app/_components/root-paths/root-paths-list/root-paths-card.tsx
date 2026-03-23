@@ -86,7 +86,11 @@ export const RootPathsCard = ({ item, index }: Props) => {
         </div>
         <div className="flex items-center gap-3 mt-0.5 text-xs text-zinc-400">
           <span>✈ {item.distanceKm.toLocaleString()} km</span>
-          {item.allowedDays && <span>🗓 {item.allowedDays}d stay</span>}
+          {item.allowedDays ? (
+            <span>🗓 {item.allowedDays}d stay</span>
+          ) : (
+            <span className="text-red-500">unknown</span>
+          )}
           <span className="font-mono">score {item.score}</span>
         </div>
       </div>
