@@ -61,17 +61,21 @@ export const RootPathsPanel = () => {
         </span>
       </div>
 
-      {targetCountry ? (
+      {!targetCountry && (
         <p className="text-sm text-zinc-400">
           Select a destination in the route list to find directions.
         </p>
-      ) : !canBuildRoute ? (
+      )}
+
+      {targetCountry && !canBuildRoute && (
         <p className="text-sm text-zinc-400">
           {lat === null || lon === null
             ? "Location unavailable. Cannot find route from your position."
             : "Cannot determine coordinates for this leg."}
         </p>
-      ) : (
+      )}
+
+      {targetCountry && canBuildRoute && (
         <>
           {/* From → To */}
           <div className="flex items-center gap-2 text-sm text-zinc-600">

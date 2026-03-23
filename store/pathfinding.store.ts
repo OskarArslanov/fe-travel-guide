@@ -15,7 +15,7 @@ type PathfindingStoreType = {
 } & StoreProps;
 
 export const usePathfindingStore = create<PathfindingStoreType>()((set) => ({
-  isLoading: true,
+  isLoading: false,
   findPath: async (request) => {
     try {
       set({ isLoading: true });
