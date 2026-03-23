@@ -107,7 +107,7 @@ export const Selector: FC<Props> = (props) => {
                 <button
                   type="button"
                   onClick={() => handleSelect(p)}
-                  className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-zinc-50 transition-colors ${
+                  className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-zinc-50 transition-colors truncate ${
                     p.id === value?.id
                       ? "bg-blue-50 text-blue-700"
                       : "text-zinc-800"
