@@ -10,7 +10,7 @@ import {
 /** Публичный OSRM-инстанс на OpenStreetMap данных */
 const OSRM_BASE = "http://router.project-osrm.org";
 
-export class PathfindingService {
+class PathfindingService {
   /**
    * Строит маршрут между точками.
    * @param from       - точка отправления
@@ -26,8 +26,6 @@ export class PathfindingService {
     const url =
       `${OSRM_BASE}/route/v1/${mode}/${coords}` +
       `?overview=full&geometries=geojson&steps=true`;
-
-    console.log(`OSRM request: ${url}`);
 
     const resp = await fetch(url);
 
@@ -72,4 +70,11 @@ export class PathfindingService {
   }
 }
 
-export const routingService = new PathfindingService();
+let routingService: PathfindingService | null = null;
+
+export const getPathfindingService = (): PathfindingService => {
+  if (!routingService) {
+    routingService = new PathfindingService();
+  }
+  return routingService;
+};

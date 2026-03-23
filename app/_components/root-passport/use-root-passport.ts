@@ -18,12 +18,13 @@ export const useRootPassport = () => {
   };
 
   useEffect(() => {
-    if (!passport) return;
+    if (!passport || !geo) return;
     fetchPath({
       passport,
       limit: parseInt(limit),
-      lat: geo?.lat,
-      lon: geo?.lon,
+      lat: geo.lat,
+      lon: geo.lon,
+      currentCountryCode: geo.countryCode,
     });
   }, [passport, limit, geo]);
 

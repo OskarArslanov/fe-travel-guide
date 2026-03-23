@@ -2,8 +2,9 @@
 
 import { create } from "zustand";
 import { GeoLocationType } from "@/app/api/geo/geo-types";
-import { fetchGeo } from "@/store/api/geo.api";
 import { StoreProps } from "@/consts/props";
+import { fetchGeoAction } from "@/app/api/geo/action";
+import { useAlertStore } from "./alert.store";
 
 type GeoStoreType = {
   fetchGeo: () => Promise<void>;
@@ -15,10 +16,17 @@ export const useGeoStore = create<GeoStoreType>()((set) => ({
   fetchGeo: async () => {
     try {
       set({ isLoading: true });
-      const resp = await fetchGeo();
+      const resp = await fetchGeoAction();
       set({ geo: resp });
     } catch (e) {
       console.error("Failed to fetch geo:", e);
+      useAlertStore
+        .getState()
+        .addAlert({
+          message:
+            "Не удалось определить геолокацию. Проверьте соединение с интернетом.",
+          type: "error",
+        });
       set({ error: e });
     } finally {
       set({ isLoading: false });

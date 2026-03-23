@@ -1,4 +1,4 @@
-import { visaService } from "../visa/visa-helpers";
+import { getVisaService } from "../visa/visa-service";
 import { VisaStatus } from "../visa/visa-types";
 import {
   PathType,
@@ -228,9 +228,9 @@ export class PathService {
    * distanceKm — расстояние от origin до каждой страны независимо.
    */
   async suggest(request: PathRequest): Promise<PathResponse> {
-    const { passport, currenctCountryCode, lat, limit, lon } = request;
+    const { passport, currentCountryCode, lat, limit, lon } = request;
     const candidates = (await this.buildCandidates(passport, lat, lon)).filter(
-      (c) => c.countryCode !== currenctCountryCode,
+      (c) => c.countryCode !== currentCountryCode,
     );
 
     const sorted = candidates
@@ -337,7 +337,7 @@ export class PathService {
 
   /** Собирает кандидатов с визовой информацией и центроидами */
   private async buildCandidates(passport: string, lat: number, lon: number) {
-    const visaInfo = await visaService.getVisaInfo(passport);
+    const visaInfo = await getVisaService().getVisaInfo(passport);
 
     return visaInfo.entries
       .filter((entry) => entry.status !== VisaStatus.NO_ADMISSION)
@@ -373,6 +373,10 @@ export class PathService {
     allowedDays: number | null,
     distanceKm: number,
   ): number {
+    const visaMultiplier = 0.35;
+    const daysMultiplier = 0.1;
+    const proximityMultiplier = 0.55;
+
     const visaScore = VISA_STATUS_SCORE[status];
 
     const daysScore =
@@ -387,7 +391,11 @@ export class PathService {
       (1 - distanceKm / MAX_DISTANCE_KM) * 100,
     );
 
-    return visaScore * 0.35 + daysScore * 0.1 + proximityScore * 0.55;
+    return (
+      visaScore * visaMultiplier +
+      daysScore * daysMultiplier +
+      proximityScore * proximityMultiplier
+    );
   }
 
   /**
@@ -410,4 +418,11 @@ export class PathService {
   }
 }
 
-export const pathService = new PathService();
+let pathService: PathService | null = null;
+
+export const getPathService = (): PathService => {
+  if (!pathService) {
+    pathService = new PathService();
+  }
+  return pathService;
+};

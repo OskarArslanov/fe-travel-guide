@@ -1,50 +1,35 @@
-type StandType = 'dev' | 'stage' | 'prod';
-
-export const isCurrentHost = (stand: StandType) => {
-  const env = process.env.NEXT_PUBLIC_API_URL;
-
-  if (env?.includes('dev')) return stand === 'dev';
-  if (env?.includes('stage')) return stand === 'stage';
-  if (env?.includes('tasko.group')) return stand === 'prod';
-  return false;
-};
-
-export type ErrorType = {
-  code: number;
-  message: string;
-};
-
-const catchError = async (response: Response) => {
-  const json = await response.json();
-
-  throw new Error(
-    JSON.stringify({
-      code: response.status,
-      message: json.message,
-    }),
-  );
-};
+export class FetchError extends Error {
+  constructor(
+    public status: number,
+    public data: { message: string },
+  ) {
+    super(data.message);
+    this.name = "FetchError";
+  }
+}
 
 export const baseFetch = async (url: string, options?: RequestInit) => {
-  const withOrigin = url.startsWith('http') ? url : process.env.NEXT_PUBLIC_API_URL + url;
-  const revalidateTime = 1440;
-  const defaultHeaders: Record<string, string> = {
-    'Content-Type': 'application/json',
-  };
-
-  let response = await fetch(withOrigin, {
+  const resultUrl = url.startsWith("http")
+    ? url
+    : `${process.env.NEXT_PUBLIC_API_URL}${url}`;
+  const response = await fetch(resultUrl, {
     ...options,
-    headers: { ...defaultHeaders, ...options?.headers },
-    next: {
-      revalidate: revalidateTime,
-      ...options?.next,
+    headers: {
+      "Content-Type": "application/json",
+      ...options?.headers,
     },
   });
 
-  if (!response.ok && typeof window !== 'undefined') {
-    response = await catchError(response);
+  const data = await response.json();
+
+  if (!response.ok) {
+    console.log(response);
+    return new FetchError(response.status, data);
   }
 
-  const data = await response.json();
   return data;
+};
+
+export const isFetchError = (error: unknown): error is FetchError => {
+  return error instanceof FetchError;
 };

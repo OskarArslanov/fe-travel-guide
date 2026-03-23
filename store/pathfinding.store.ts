@@ -6,7 +6,7 @@ import {
   PathfindingRequest,
   PathfindingResponse,
 } from "@/app/api/pathfinding/pathfinding-types";
-import { findPath } from "@/store/api/pathfinding.api";
+import { fetchPathfindingAction } from "@/app/api/pathfinding/action";
 
 type PathfindingStoreType = {
   findPath: (request: PathfindingRequest) => Promise<void>;
@@ -18,7 +18,7 @@ export const usePathfindingStore = create<PathfindingStoreType>()((set) => ({
   findPath: async (request) => {
     try {
       set({ isLoading: true });
-      const resp = await findPath(request);
+      const resp = await fetchPathfindingAction(request);
       set({ path: resp });
     } catch (e) {
       console.error("Failed to fetch paths:", e);

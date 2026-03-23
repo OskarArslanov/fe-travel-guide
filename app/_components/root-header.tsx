@@ -1,8 +1,9 @@
+import { Loader } from "@/components/loader";
 import { useGeoStore } from "@/store/geo.store";
 import { useEffect } from "react";
 
 export const RootHeader = () => {
-  const { geo, fetchGeo } = useGeoStore();
+  const { geo, fetchGeo, isLoading } = useGeoStore();
 
   useEffect(() => {
     fetchGeo();
@@ -20,14 +21,26 @@ export const RootHeader = () => {
             Discover visa-friendly destinations sorted by accessibility
           </p>
         </div>
-        {geo && (
-          <div className="ml-auto flex items-center gap-1.5 text-xs text-zinc-500 bg-zinc-50 border border-zinc-200 rounded-full px-3 py-1.5">
-            <span>📍</span>
-            <span>
-              {geo.city}, {geo.country}
-            </span>
-          </div>
-        )}
+
+        <div className="ml-auto flex items-center gap-1.5 text-xs text-zinc-500 bg-zinc-50 border border-zinc-200 rounded-full px-3 py-1.5">
+          {isLoading && (
+            <p className="text-xs text-zinc-400 flex items-center gap-1.5">
+              <Loader />
+              Detecting your location…
+            </p>
+          )}
+          {geo && (
+            <>
+              <span>📍</span>
+              <span>
+                {geo.city}, {geo.country}
+              </span>
+            </>
+          )}
+          {!isLoading && !geo && (
+            <span className="text-red-500">Failed to detect location</span>
+          )}
+        </div>
       </div>
     </header>
   );

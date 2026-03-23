@@ -15,7 +15,7 @@ export type PathRequest = {
   lat: number;
   lon: number;
   limit?: number;
-  currenctCountryCode?: string;
+  currentCountryCode: string;
 };
 
 export type PathResponse = {

@@ -1,12 +1,13 @@
+import { baseFetch } from "@/consts/base-fetch";
 import { GeoLocationType, IpApiResponse } from "./geo-types";
 
-export class GeoService {
+class GeoService {
   /**
    * Определяет геолокацию по IP-адресу из входящего HTTP-запроса.
    * Учитывает заголовки прокси: X-Forwarded-For, X-Real-IP.
    */
-  async locateRequest(req: Request): Promise<GeoLocationType> {
-    const ip = this.extractIp(req);
+  async locateRequest(headers: Headers): Promise<GeoLocationType> {
+    const ip = await this.extractIp(headers);
     return this.locateIp(ip);
   }
 
@@ -20,34 +21,26 @@ export class GeoService {
 
     const url = `http://ip-api.com/json/${resolvedIp}?fields=status,message,country,countryCode,region,regionName,city,lat,lon,timezone,query`;
 
-    const resp = await fetch(url);
-    if (!resp.ok) {
-      throw new Error(`ip-api.com responded with HTTP ${resp.status}`);
-    }
-
-    const data = (await resp.json()) as IpApiResponse;
-
-    if (data.status === "fail") {
-      throw new Error(`ip-api.com failed for IP "${resolvedIp}": ${data.message}`);
-    }
+    const resp = (await baseFetch(url)) as IpApiResponse;
 
     return {
-      ip: data.query,
-      countryCode: data.countryCode,
-      country: data.country,
-      region: data.regionName,
-      city: data.city,
-      lat: data.lat,
-      lon: data.lon,
-      timezone: data.timezone,
+      ip: resp.query,
+      countryCode: resp.countryCode,
+      country: resp.country,
+      region: resp.regionName,
+      city: resp.city,
+      lat: resp.lat,
+      lon: resp.lon,
+      timezone: resp.timezone,
     };
   }
 
   /**
    * Извлекает реальный IP из запроса с учётом заголовков прокси/балансировщика.
    */
-  private extractIp(req: Request): string {
-    const forwarded = req.headers.get("x-forwarded-for");
+  private async extractIp(headers: Headers): Promise<string> {
+    const forwarded = headers.get("x-forwarded-for");
+
     if (forwarded) {
       // X-Forwarded-For может содержать цепочку: "client, proxy1, proxy2"
       const first = Array.isArray(forwarded)
@@ -56,12 +49,12 @@ export class GeoService {
       return first.trim();
     }
 
-    const realIp = req.headers.get("x-real-ip");
+    const realIp = headers.get("x-real-ip");
     if (realIp) {
       return Array.isArray(realIp) ? realIp[0] : realIp;
     }
 
-    const ip = req.headers.get("cf-connecting-ip"); // Cloudflare
+    const ip = headers.get("cf-connecting-ip"); // Cloudflare
     return ip || "127.0.0.1";
   }
 
@@ -69,8 +62,7 @@ export class GeoService {
   private async resolveExternalIp(): Promise<string> {
     try {
       const resp = await fetch("https://api.ipify.org?format=json");
-      const data = await resp.json() as { ip: string };
-      console.log(`Resolved external IP: ${data.ip}`);
+      const data = (await resp.json()) as { ip: string };
       return data.ip;
     } catch {
       console.warn("Failed to resolve external IP, falling back to 127.0.0.1");
@@ -90,4 +82,11 @@ export class GeoService {
   }
 }
 
-export const geoService = new GeoService();
+let geoService: GeoService | null = null;
+
+export const getGeoService = (): GeoService => {
+  if (!geoService) {
+    geoService = new GeoService();
+  }
+  return geoService;
+};

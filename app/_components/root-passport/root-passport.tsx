@@ -1,4 +1,3 @@
-import { Loader } from "@/components/loader";
 import { Selector } from "@/components/selector";
 import {
   PassportSelector,
@@ -50,13 +49,6 @@ export const RootPassport = () => {
             />
           </div>
         </div>
-
-        {geoLoading && (
-          <p className="mt-3 text-xs text-zinc-400 flex items-center gap-1.5">
-            <Loader />
-            Detecting your location…
-          </p>
-        )}
       </div>
       {!!pathError && (
         <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">

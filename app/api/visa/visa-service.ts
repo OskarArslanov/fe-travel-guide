@@ -5,13 +5,14 @@ import {
   VISA_STATUS_RANK,
   VisaStatus,
 } from "./visa-types";
+import { getWikiVisaDaysService } from "./wiki-visa-days";
 
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 
 const DATA_URL =
   "https://raw.githubusercontent.com/imorte/passport-index-data/main/passport-index.json";
 
-export class VisaService {
+class VisaService {
   private cache: RawPassportIndex = {};
   private cacheUpdatedAt: number = 0;
 
@@ -34,6 +35,16 @@ export class VisaService {
         allowedDays: record.days ?? null,
       }));
 
+    await getWikiVisaDaysService()
+      .getAllDays(code)
+      .then((daysMap) => {
+        entries.forEach((entry) => {
+          if (entry.allowedDays === null && daysMap[entry.destination]) {
+            entry.allowedDays = daysMap[entry.destination];
+          }
+        });
+      });
+
     entries.sort((a, b) => {
       const rankDiff = VISA_STATUS_RANK[a.status] - VISA_STATUS_RANK[b.status];
       if (rankDiff !== 0) return rankDiff;
@@ -55,7 +66,6 @@ export class VisaService {
 
   private async refreshCache(): Promise<void> {
     try {
-      console.log("Fetching passport index data from GitHub...");
       const resp = await fetch(DATA_URL);
       if (!resp.ok) {
         throw new Error(`HTTP ${resp.status}: ${resp.statusText}`);
@@ -64,9 +74,6 @@ export class VisaService {
       const data = await resp.json();
       this.cache = data as RawPassportIndex;
       this.cacheUpdatedAt = Date.now();
-      console.log(
-        `Passport index loaded: ${Object.keys(this.cache).length} passports`,
-      );
     } catch (error: unknown) {
       console.error("Failed to refresh passport index cache", error);
       // Если кэш уже есть — продолжаем работать со старыми данными
@@ -109,4 +116,11 @@ export class VisaService {
   }
 }
 
-export const visaService = new VisaService();
+let visaService: VisaService | null = null;
+
+export const getVisaService = (): VisaService => {
+  if (!visaService) {
+    visaService = new VisaService();
+  }
+  return visaService;
+};
