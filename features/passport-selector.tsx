@@ -219,15 +219,20 @@ export const PassportSelector: FC<PassportSelectorProps> = (props) => {
       disabled={disabled}
       placeholder="Select passport country…"
       triggerClassName="min-w-[300px]"
-      element={(opt) => (
-        <>
-          <span className="text-lg">{getFlagEmoji(opt.id)}</span>
-          <span>{opt.value}</span>
-          <span className="ml-auto text-xs text-zinc-400 font-mono">
-            {opt.id}
-          </span>
-        </>
-      )}
+      element={(opt) => {
+        if (!opt) return <span>Select passport country…</span>;
+        const { id, value } = opt;
+
+        return (
+          <>
+            <span className="text-lg">{getFlagEmoji(id)}</span>
+            <span>{value}</span>
+            <span className="ml-auto text-xs text-zinc-400 font-mono">
+              {id}
+            </span>
+          </>
+        );
+      }}
     />
   );
 };
