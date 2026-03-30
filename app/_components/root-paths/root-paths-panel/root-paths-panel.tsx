@@ -9,6 +9,7 @@ import { countryCentroids } from "./root-paths-panel-helpers";
 import { useQueryParams } from "@/hooks/use-query-params";
 import { usePathfindingStore } from "@/store/pathfinding.store";
 import { useGeoStore } from "@/store/geo.store";
+import { usePathStore } from "@/store/path.store";
 import { getFlagEmoji } from "@/consts/utils";
 
 function formatDuration(minutes: number): string {
@@ -34,6 +35,12 @@ export const RootPathsPanel = () => {
 
   const { findPath, isLoading, path: result } = usePathfindingStore();
   const [mode, setMode] = useState<TravelMode>(TravelMode.CAR);
+
+  // Find COL data for selected destination
+  const path = usePathStore().path;
+  const selectedPathItem = path?.suggestions.find(
+    (s) => s.countryCode === targetCountry,
+  );
 
   const { from, to, canBuildRoute } = useMemo(() => {
     const from: CoordinateType | undefined =
@@ -193,6 +200,51 @@ export const RootPathsPanel = () => {
               )}
             </div>
           )}
+        </>
+      )}
+
+      {/* Cost of Living section */}
+      {selectedPathItem?.costOfLiving && (
+        <>
+          <div className="h-px bg-zinc-100" />
+          <div className="flex flex-col gap-2">
+            <span className="text-sm font-semibold text-zinc-700">
+              💸 Cost of Living
+            </span>
+            <div className="grid grid-cols-2 gap-2">
+              <div className="flex flex-col p-2.5 bg-zinc-50 rounded-lg">
+                <span className="text-xs text-zinc-400">Monthly budget</span>
+                <span className="text-base font-bold text-zinc-800">
+                  ${selectedPathItem.costOfLiving.monthlyBudget.toLocaleString()}
+                </span>
+                <span className="text-xs text-zinc-400">excl. rent</span>
+              </div>
+              <div className="flex flex-col p-2.5 bg-zinc-50 rounded-lg">
+                <span className="text-xs text-zinc-400">Rent (1BR)</span>
+                <span className="text-base font-bold text-zinc-800">
+                  ${selectedPathItem.costOfLiving.rent.toLocaleString()}
+                </span>
+                <span className="text-xs text-zinc-400">city center/mo</span>
+              </div>
+              <div className="flex flex-col p-2.5 bg-zinc-50 rounded-lg">
+                <span className="text-xs text-zinc-400">COL Index</span>
+                <span className="text-base font-bold text-zinc-800">
+                  {selectedPathItem.costOfLiving.colIndex}
+                </span>
+                <span className="text-xs text-zinc-400">NYC = 100</span>
+              </div>
+              <div className="flex flex-col p-2.5 bg-zinc-50 rounded-lg">
+                <span className="text-xs text-zinc-400">Local Purch. Power</span>
+                <span className="text-base font-bold text-zinc-800">
+                  {selectedPathItem.costOfLiving.lppIndex}
+                </span>
+                <span className="text-xs text-zinc-400">NYC = 100</span>
+              </div>
+            </div>
+            <p className="text-xs text-zinc-400">
+              * Approximate 2024 estimates in USD
+            </p>
+          </div>
         </>
       )}
     </div>

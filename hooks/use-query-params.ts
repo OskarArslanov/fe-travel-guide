@@ -7,7 +7,7 @@ export const useQueryParams = () => {
 
   const getQueryParams = () => {
     const result: Record<string, string> = {};
-    searchParams.forEach((value, key) => {
+    searchParams?.forEach((value, key) => {
       result[key] = value;
     });
     return result;

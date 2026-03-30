@@ -1,3 +1,4 @@
+import { getCostOfLiving } from "../cost/cost-data";
 import { getVisaService } from "../visa/visa-service";
 import { VisaStatus } from "../visa/visa-types";
 import {
@@ -286,6 +287,7 @@ export class PathService {
       allowedDays: c.allowedDays,
       distanceKm: Math.round(c.distanceFromOriginKm),
       score: Math.round(c.score * 10) / 10,
+      costOfLiving: getCostOfLiving(c.countryCode),
     }));
 
     return {
@@ -354,6 +356,7 @@ export class PathService {
         allowedDays: bestCandidate.allowedDays,
         distanceKm: Math.round(distFromPrev),
         score: Math.round(bestScore * 10) / 10,
+        costOfLiving: getCostOfLiving(bestCandidate.countryCode),
       });
 
       prevLat = bestCandidate.centroid[0];

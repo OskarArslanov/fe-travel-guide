@@ -96,6 +96,12 @@ export const RootPathsCard = ({ item, index }: Props) => {
           )}
           <span className="font-mono">score {item.score}</span>
         </div>
+        {item.costOfLiving && (
+          <div className="flex items-center gap-3 mt-0.5 text-xs text-zinc-400">
+            <span>💸 ${item.costOfLiving.monthlyBudget}/mo</span>
+            <span>🏠 ${item.costOfLiving.rent}/mo rent</span>
+          </div>
+        )}
       </div>
 
       {/* Selected indicator */}

@@ -1,3 +1,4 @@
+import { CostOfLiving } from "../cost/cost-types";
 import { VisaStatus } from "../visa/visa-types";
 
 export type PathType = {
@@ -8,6 +9,7 @@ export type PathType = {
   /** Расстояние от origin (для suggest) или от предыдущей точки (для suggestChain) */
   distanceKm: number;
   score: number;
+  costOfLiving: CostOfLiving | null;
 };
 
 export type PathFilterRequest = {
